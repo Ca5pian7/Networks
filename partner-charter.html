@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tunnel Bot — Partner Network Charter</title>
+<style>
+  :root{
+    --ink:#1a1d1f; --ink-dim:#5b6268; --line:#e4e7ea; --bg:#fbfbfa;
+    --panel:#ffffff; --accent:#3A5DFF; --accent-soft:#eef1ff; --amber:#c9862b;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Georgia,'Iowan Old Style','Palatino Linotype',serif;line-height:1.65;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px 100px;}
+  header{padding:56px 24px 36px;border-bottom:1px solid var(--line);}
+  .badge{font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;
+    font-size:11px;color:var(--accent);margin-bottom:12px;}
+  h1{font-size:2.1rem;margin:0 0 10px;line-height:1.2;max-width:16ch;}
+  .meta{color:var(--ink-dim);font-size:.9rem;font-family:var(--mono);}
+  section{padding:40px 0;border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-size:1.4rem;margin:0 0 12px;}
+  .num{font-family:var(--mono);color:var(--accent);margin-right:8px;}
+  p,li{color:#33393d;}
+  ul,ol{padding-left:22px;}
+  li{margin-bottom:8px;}
+  .callout{background:var(--accent-soft);border-left:4px solid var(--accent);
+    border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0;}
+  .callout.warn{background:#fdf3e7;border-left-color:var(--amber);}
+  .signature{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:20px 22px;font-family:var(--mono);font-size:.9rem;color:var(--ink-dim);}
+  footer{padding:40px 24px 0;color:var(--ink-dim);font-size:.85rem;text-align:center;font-family:var(--mono);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap" style="padding:0;">
+    <div class="badge">Partner Agreement</div>
+    <h1>Tunnel Bot Network — Partner Charter</h1>
+    <div class="meta">Version [X] &nbsp;•&nbsp; Effective [DATE]</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2><span class="num">01</span>Purpose</h2>
+  <p>This Charter sets out what it means for a Discord server to join the Tunnel Bot partner network — a group of independent Discord communities that share safety information to identify and contain harmful users, and optionally connect for cross-server chat.</p>
+  <p>By registering your server with the network (running the <code>/setup</code> commands), your server's owner or admin agrees to this Charter on behalf of the server.</p>
+</section>
+
+<section>
+  <h2><span class="num">02</span>What membership means</h2>
+  <ul>
+    <li>Your server keeps full control over its own rules, moderation, and members — the network does not override your server's autonomy.</li>
+    <li>Your server appoints one <strong>Network Liaison</strong> — the point of contact for network matters.</li>
+    <li>Your server can file reports on users who violate safety standards, using evidence-backed reports via <code>/report</code>.</li>
+    <li>Your server will receive network-wide alerts about confirmed Tier 2/3 cases, and decides locally how to act on them (ban, kick, watch, or ignore).</li>
+    <li>Your server may connect to optional features: global chat relay, partnership ads — participation in these is optional even after joining.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">03</span>Reporting standards</h2>
+  <div class="callout">
+    Reports must include real evidence — message links, screenshots, or a specific factual account. Vague accusations without evidence will be rejected by the Review Team.
+  </div>
+  <p>Reports are reviewed before any network-wide action. Filing knowingly false or malicious reports is a violation of this Charter and may result in your server's removal from the network.</p>
+</section>
+
+<section>
+  <h2><span class="num">04</span>Tier system &amp; your responsibilities</h2>
+  <ul>
+    <li><strong>Tier 1</strong> — logged only, no action needed from your server.</li>
+    <li><strong>Tier 2</strong> — network alert sent to your Liaison's alert channel. Your server decides what to do.</li>
+    <li><strong>Tier 3</strong> — severe cases. In addition to the network alert, we recommend your server also report directly to Discord Trust &amp; Safety, and to law enforcement or NCMEC where relevant (e.g. child safety threats). The network does not replace these channels.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">05</span>Data sharing you're agreeing to</h2>
+  <p>When a report from any partner server is confirmed at Tier 2/3, the reported user's Discord ID and report category are broadcast to every partner server's alert channel — including yours, and including cases reported by other servers, not just your own. This is the core mechanism of the network.</p>
+  <p>Full details are in the network's <a href="legal-docs.html#privacy">Privacy Policy</a>.</p>
+</section>
+
+<section>
+  <h2><span class="num">06</span>Appeals</h2>
+  <p>Any user flagged by a network alert can appeal via <code>/appeal</code> from any partner server. Appeals are reviewed by the Review Team; if upheld, a retraction is broadcast network-wide the same way the original alert was.</p>
+</section>
+
+<section>
+  <h2><span class="num">07</span>Removal from the network</h2>
+  <div class="callout warn">
+    A server may be removed from the network for: repeated bad-faith reports, misuse of global chat, failure to appoint an active Liaison, or violation of this Charter. A server may also leave voluntarily at any time by removing the Bot.
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">08</span>Acknowledgement</h2>
+  <div class="signature">
+    By running <code>/setup alerts_channel</code>, <code>/setup global_channel</code>, or <code>/setup liaison</code> in your server, an authorized admin of your server confirms they have read and agree to this Charter and the network's <a href="legal-docs.html">Privacy Policy &amp; Terms of Service</a> on behalf of the server.
+  </div>
+</section>
+
+</div>
+
+<footer>
+  Tunnel Bot Network • Partner Charter • Share this link with new partner servers before onboarding
+</footer>
+
+</body>
+</html>

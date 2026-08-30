@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tunnel Bot — A Safety Network for Discord Communities</title>
+<meta name="description" content="Tunnel Bot connects partner Discord servers into one safety network — shared reporting, network-wide alerts, and optional cross-server chat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0E14;
+    --panel:#12161F;
+    --panel-2:#171C27;
+    --line:#232A38;
+    --line-soft:#1B212D;
+    --text:#E9EDF3;
+    --text-dim:#8A93A3;
+    --text-faint:#59606E;
+    --signal:#4C8DFF;     /* Line 1 — Reporting */
+    --signal-soft:#4C8DFF22;
+    --teal:#35C79A;       /* Line 2 — Global Chat */
+    --amber:#F2A93B;      /* Line 3 — Alerts & Tiers */
+    --violet:#9B7FE0;     /* Line 4 — Filters & Admin */
+    --display:'Space Grotesk',sans-serif;
+    --body:'IBM Plex Sans',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(900px 500px at 85% -10%, #1a2233 0%, transparent 60%),
+      radial-gradient(700px 400px at 5% 10%, #16202a 0%, transparent 55%),
+      var(--ink);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  .bg-grid{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 20%, black 30%, transparent 75%);
+    opacity:.5;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:blur(10px);
+    background:rgba(11,14,20,0.75);
+    border-bottom:1px solid var(--line);
+  }
+  .navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;max-width:1120px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:1.05rem;letter-spacing:.01em;text-decoration:none;}
+  .brand-mark{width:26px;height:26px;flex-shrink:0;}
+  .navlinks{display:flex;gap:28px;font-size:.9rem;color:var(--text-dim);}
+  .navlinks a{text-decoration:none;transition:color .15s;}
+  .navlinks a:hover{color:var(--text);}
+  .nav-cta{
+    font-family:var(--mono);font-size:.82rem;padding:8px 16px;border-radius:6px;
+    background:var(--signal);color:#0B0E14;font-weight:500;text-decoration:none;
+    transition:opacity .15s;
+  }
+  .nav-cta:hover{opacity:.88;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:96px 28px 40px;position:relative;}
+  .eyebrow{
+    font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--signal);display:flex;align-items:center;gap:10px;margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);
+    animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  h1{
+    font-family:var(--display);font-weight:700;font-size:clamp(2.3rem,5.5vw,4rem);
+    line-height:1.06;letter-spacing:-.01em;max-width:15ch;margin-bottom:22px;
+  }
+  h1 .accent{color:var(--signal);}
+  .hero-sub{color:var(--text-dim);font-size:1.1rem;max-width:52ch;margin-bottom:36px;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:64px;}
+  .btn{
+    font-family:var(--mono);font-size:.88rem;padding:13px 22px;border-radius:8px;
+    text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .15s;
+    border:1px solid transparent;
+  }
+  .btn-primary{background:var(--signal);color:#0B0E14;font-weight:500;}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--signal-soft);}
+  .btn-ghost{border-color:var(--line);color:var(--text);}
+  .btn-ghost:hover{border-color:var(--signal);color:var(--signal);}
+
+  /* ---------- TRANSIT MAP (signature element) ---------- */
+  .map-frame{
+    border:1px solid var(--line);border-radius:16px;background:var(--panel);
+    padding:28px 20px 20px;position:relative;overflow:hidden;
+  }
+  .map-frame::before{
+    content:"NETWORK MAP";position:absolute;top:16px;left:24px;
+    font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;color:var(--text-faint);
+  }
+  .map-frame::after{
+    content:"LIVE";position:absolute;top:16px;right:24px;
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--teal);
+    border:1px solid var(--teal);padding:2px 8px;border-radius:20px;
+  }
+  svg.map{width:100%;height:auto;display:block;margin-top:20px;}
+  .map-line{fill:none;stroke-width:2.5;opacity:.55;}
+  .map-signal{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:6 14;
+    animation:travel 3.2s linear infinite;}
+  @keyframes travel{to{stroke-dashoffset:-200;}}
+  .hub-node{fill:var(--ink);stroke:var(--text);stroke-width:2;}
+  .hub-core{fill:var(--text);}
+  .station{fill:var(--panel);stroke-width:2;}
+  .station-label{font-family:var(--mono);font-size:11px;fill:var(--text-dim);}
+  @media (prefers-reduced-motion: reduce){
+    .map-signal{animation:none;}
+    .eyebrow .dot{animation:none;}
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:80px 0;border-bottom:1px solid var(--line-soft);}
+  .section-head{max-width:640px;margin-bottom:48px;}
+  .line-tag{
+    font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;padding:4px 12px 4px 4px;
+    border-radius:20px;
+  }
+  .line-tag .chip{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;color:#0B0E14;}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:14px;letter-spacing:-.005em;}
+  .section-sub{color:var(--text-dim);font-size:1rem;max-width:56ch;}
+
+  /* two-purpose split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .purpose-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px 28px;
+    position:relative;overflow:hidden;
+  }
+  .purpose-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;}
+  .purpose-card.p1::before{background:var(--signal);}
+  .purpose-card.p2::before{background:var(--teal);}
+  .purpose-num{font-family:var(--mono);font-size:.78rem;color:var(--text-faint);margin-bottom:14px;}
+  .purpose-card h3{font-family:var(--display);font-size:1.35rem;margin-bottom:12px;font-weight:600;}
+  .purpose-card p{color:var(--text-dim);font-size:.95rem;margin-bottom:18px;}
+  .purpose-list{list-style:none;font-size:.88rem;color:var(--text-dim);}
+  .purpose-list li{padding-left:20px;position:relative;margin-bottom:8px;}
+  .purpose-list li::before{content:"→";position:absolute;left:0;color:var(--text-faint);}
+
+  /* how it works — line stops */
+  .line-track{position:relative;padding-left:36px;}
+  .line-track::before{
+    content:"";position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:var(--line);
+  }
+  .stop{position:relative;padding-bottom:44px;}
+  .stop:last-child{padding-bottom:0;}
+  .stop-dot{
+    position:absolute;left:-36px;top:2px;width:20px;height:20px;border-radius:50%;
+    background:var(--panel);border:2.5px solid var(--signal);display:flex;align-items:center;justify-content:center;
+  }
+  .stop-dot::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--signal);}
+  .stop h4{font-family:var(--display);font-size:1.1rem;margin-bottom:6px;font-weight:600;}
+  .stop p{color:var(--text-dim);font-size:.92rem;max-width:56ch;}
+  .stop .stop-tag{font-family:var(--mono);font-size:.72rem;color:var(--text-faint);margin-bottom:4px;display:block;}
+
+  /* feature grid — station chips */
+  .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .feature{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 22px;
+    transition:border-color .15s, transform .15s;
+  }
+  .feature:hover{border-color:var(--signal);transform:translateY(-2px);}
+  .feature-icon{
+    width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:16px;margin-bottom:14px;
+  }
+  .feature h4{font-family:var(--display);font-size:1.02rem;margin-bottom:8px;font-weight:600;}
+  .feature p{color:var(--text-dim);font-size:.86rem;}
+
+  /* tier strip */
+  .tier-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .tier{border:1px solid var(--line);border-radius:12px;padding:22px;background:var(--panel-2);}
+  .tier-badge{
+    font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;padding:3px 10px;border-radius:20px;
+    display:inline-block;margin-bottom:12px;
+  }
+  .tier1 .tier-badge{background:#4C8DFF22;color:var(--signal);}
+  .tier2 .tier-badge{background:#F2A93B22;color:var(--amber);}
+  .tier3 .tier-badge{background:#e5595922;color:#e55959;}
+  .tier h4{font-family:var(--display);font-size:1rem;margin-bottom:8px;font-weight:600;}
+  .tier p{color:var(--text-dim);font-size:.85rem;}
+
+  /* policies */
+  .policy-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .policy-card{
+    border:1px solid var(--line);border-radius:12px;padding:24px 22px;background:var(--panel);
+    text-decoration:none;display:block;transition:border-color .15s;
+  }
+  .policy-card:hover{border-color:var(--signal);}
+  .policy-card .pk{font-family:var(--mono);font-size:.72rem;color:var(--text-faint);margin-bottom:10px;display:block;}
+  .policy-card h4{font-family:var(--display);font-size:1.02rem;margin-bottom:8px;font-weight:600;}
+  .policy-card p{color:var(--text-dim);font-size:.85rem;}
+  .policy-card .go{font-family:var(--mono);font-size:.8rem;color:var(--signal);margin-top:14px;display:block;}
+
+  /* stats bar */
+  .stats-bar{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  }
+  .stat{background:var(--panel);padding:26px 20px;text-align:center;}
+  .stat b{display:block;font-family:var(--display);font-size:1.9rem;color:var(--signal);font-weight:700;}
+  .stat span{font-family:var(--mono);font-size:.74rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;}
+
+  /* final cta */
+  .final-cta{
+    text-align:center;padding:90px 28px;border-bottom:none;
+  }
+  .final-cta h2{max-width:20ch;margin:0 auto 16px;}
+  .final-cta .section-sub{margin:0 auto 36px;}
+  .cta-row.center{justify-content:center;}
+
+  footer{padding:40px 28px 60px;}
+  .footer-inner{
+    max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;
+    flex-wrap:wrap;gap:16px;padding-top:32px;border-top:1px solid var(--line-soft);
+  }
+  .footer-links{display:flex;gap:22px;font-size:.85rem;color:var(--text-dim);flex-wrap:wrap;}
+  .footer-links a{text-decoration:none;}
+  .footer-links a:hover{color:var(--text);}
+  .footer-note{font-family:var(--mono);font-size:.78rem;color:var(--text-faint);}
+
+  @media (max-width:860px){
+    .split, .feature-grid, .tier-strip, .policy-row{grid-template-columns:1fr;}
+    .stats-bar{grid-template-columns:1fr 1fr;}
+    .navlinks{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<nav>
+  <div class="navbar">
+    <a href="#" class="brand">
+      <svg class="brand-mark" viewBox="0 0 26 26" fill="none">
+        <circle cx="13" cy="13" r="11" stroke="#4C8DFF" stroke-width="2"/>
+        <circle cx="13" cy="13" r="3" fill="#4C8DFF"/>
+        <line x1="13" y1="2" x2="13" y2="7" stroke="#4C8DFF" stroke-width="2"/>
+        <line x1="13" y1="19" x2="13" y2="24" stroke="#4C8DFF" stroke-width="2"/>
+        <line x1="2" y1="13" x2="7" y2="13" stroke="#4C8DFF" stroke-width="2"/>
+        <line x1="19" y1="13" x2="24" y2="13" stroke="#4C8DFF" stroke-width="2"/>
+      </svg>
+      Tunnel Bot
+    </a>
+    <div class="navlinks">
+      <a href="#purpose">What it does</a>
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#policies">Policies</a>
+    </div>
+    <a href="#join" class="nav-cta">Join the network</a>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero wrap">
+  <div class="eyebrow"><span class="dot"></span>NETWORK STATUS — ONLINE</div>
+  <h1>One safety <span class="accent">network</span>. A hundred Discord communities.</h1>
+  <p class="hero-sub">Tunnel Bot connects partner servers so a bad actor caught in one community gets flagged in every community. Independent servers, shared protection.</p>
+  <div class="cta-row">
+    <a href="#join" class="btn btn-primary">→ Invite Tunnel Bot</a>
+    <a href="partner-charter.html" class="btn btn-ghost">Read the Partner Charter</a>
+  </div>
+
+  <div class="map-frame">
+    <svg class="map" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg">
+      <!-- lines from hub to stations -->
+      <path class="map-line" d="M450,190 L180,70"  stroke="#4C8DFF"/>
+      <path class="map-signal" d="M450,190 L180,70" stroke="#4C8DFF"/>
+      <path class="map-line" d="M450,190 L110,190" stroke="#35C79A"/>
+      <path class="map-signal" d="M450,190 L110,190" stroke="#35C79A" style="animation-delay:-.6s"/>
+      <path class="map-line" d="M450,190 L180,320" stroke="#F2A93B"/>
+      <path class="map-signal" d="M450,190 L180,320" stroke="#F2A93B" style="animation-delay:-1.1s"/>
+      <path class="map-line" d="M450,190 L720,320" stroke="#9B7FE0"/>
+      <path class="map-signal" d="M450,190 L720,320" stroke="#9B7FE0" style="animation-delay:-1.8s"/>
+      <path class="map-line" d="M450,190 L790,190" stroke="#4C8DFF"/>
+      <path class="map-signal" d="M450,190 L790,190" stroke="#4C8DFF" style="animation-delay:-2.3s"/>
+      <path class="map-line" d="M450,190 L720,70"  stroke="#35C79A"/>
+      <path class="map-signal" d="M450,190 L720,70" stroke="#35C79A" style="animation-delay:-2.9s"/>
+
+      <!-- hub -->
+      <circle class="hub-node" cx="450" cy="190" r="26"/>
+      <circle class="hub-core" cx="450" cy="190" r="6"/>
+      <text x="450" y="234" text-anchor="middle" class="station-label" style="fill:#E9EDF3;font-size:12px;">HUB</text>
+
+      <!-- stations -->
+      <circle class="station" cx="180" cy="70" r="9" stroke="#4C8DFF"/>
+      <text x="180" y="48" text-anchor="middle" class="station-label">REPORTING</text>
+
+      <circle class="station" cx="110" cy="190" r="9" stroke="#35C79A"/>
+      <text x="110" y="215" text-anchor="middle" class="station-label">GLOBAL CHAT</text>
+
+      <circle class="station" cx="180" cy="320" r="9" stroke="#F2A93B"/>
+      <text x="180" y="345" text-anchor="middle" class="station-label">ALERTS</text>
+
+      <circle class="station" cx="720" cy="320" r="9" stroke="#9B7FE0"/>
+      <text x="720" y="345" text-anchor="middle" class="station-label">WORD FILTERS</text>
+
+      <circle class="station" cx="790" cy="190" r="9" stroke="#4C8DFF"/>
+      <text x="790" y="215" text-anchor="middle" class="station-label">APPEALS</text>
+
+      <circle class="station" cx="720" cy="70" r="9" stroke="#35C79A"/>
+      <text x="720" y="48" text-anchor="middle" class="station-label">PARTNERSHIPS</text>
+    </svg>
+  </div>
+</header>
+
+<!-- ===================== STATS ===================== -->
+<section class="wrap" style="padding-top:56px;">
+  <div class="stats-bar">
+    <div class="stat"><b>100</b><span>Partner servers</span></div>
+    <div class="stat"><b>2</b><span>Reviewers per case</span></div>
+    <div class="stat"><b>3</b><span>Severity tiers</span></div>
+    <div class="stat"><b>24/7</b><span>Live monitoring</span></div>
+  </div>
+</section>
+
+<!-- ===================== PURPOSE ===================== -->
+<section id="purpose" class="wrap">
+  <div class="section-head">
+    <div class="line-tag" style="background:#4C8DFF15;color:#4C8DFF;"><span class="chip" style="background:#4C8DFF;">1</span>WHY TUNNEL BOT EXISTS</div>
+    <h2>Two problems, one connected fix</h2>
+    <p class="section-sub">A user banned from one server can simply join the next. And members scattered across a hundred small communities have no way to talk to each other. Tunnel Bot solves both.</p>
+  </div>
+  <div class="split">
+    <div class="purpose-card p1">
+      <div class="purpose-num">01 — SAFETY</div>
+      <h3>Cross-server reporting</h3>
+      <p>Mods file evidence-backed reports. A Review Team confirms and tiers them. Confirmed cases get broadcast to every partner server's mod-only alert channel — instantly.</p>
+      <ul class="purpose-list">
+        <li>Evidence required, not accusations</li>
+        <li>Two-reviewer confirmation before any broadcast</li>
+        <li>Every flagged user can appeal, from any server</li>
+      </ul>
+    </div>
+    <div class="purpose-card p2">
+      <div class="purpose-num">02 — COMMUNITY</div>
+      <h3>Global chat relay</h3>
+      <p>Servers that opt in get a shared chat channel. Messages relay in real time, under each person's own name and avatar — not a bot's.</p>
+      <ul class="purpose-list">
+        <li>Opt-in per server, never forced</li>
+        <li>Local and network-wide mute controls</li>
+        <li>Auto-filtered for spam and invite links</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section id="how" class="wrap">
+  <div class="section-head">
+    <div class="line-tag" style="background:#F2A93B15;color:#F2A93B;"><span class="chip" style="background:#F2A93B;">2</span>THE REPORT LINE</div>
+    <h2>What happens after a report is filed</h2>
+    <p class="section-sub">Every case follows the same track — nothing skips a stop.</p>
+  </div>
+  <div class="line-track">
+    <div class="stop">
+      <div class="stop-dot"></div>
+      <span class="stop-tag">STOP 1</span>
+      <h4>A mod files a report</h4>
+      <p>Evidence required — message links, screenshots, or a specific factual account. No evidence, no case.</p>
+    </div>
+    <div class="stop">
+      <div class="stop-dot"></div>
+      <span class="stop-tag">STOP 2</span>
+      <h4>Two reviewers confirm it</h4>
+      <p>The case lands in a private hub, invisible to the public. At least two Review Team members independently confirm before anything moves further.</p>
+    </div>
+    <div class="stop">
+      <div class="stop-dot"></div>
+      <span class="stop-tag">STOP 3</span>
+      <h4>A tier gets assigned</h4>
+      <p>Tier 1 stays logged. Tier 2 broadcasts network-wide. Tier 3 broadcasts and is also referred to Discord Trust & Safety directly.</p>
+    </div>
+    <div class="stop">
+      <div class="stop-dot"></div>
+      <span class="stop-tag">STOP 4</span>
+      <h4>Every partner server is alerted</h4>
+      <p>A mod-only alert lands in every server's alert channel. Each server decides locally what to do — the network informs, it never overrides.</p>
+    </div>
+    <div class="stop">
+      <div class="stop-dot"></div>
+      <span class="stop-tag">STOP 5 — OPTIONAL</span>
+      <h4>The user appeals</h4>
+      <p>From any partner server, or by DM. If upheld, a retraction broadcasts the same way the original alert did.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TIERS ===================== -->
+<section class="wrap">
+  <div class="section-head">
+    <div class="line-tag" style="background:#9B7FE015;color:#9B7FE0;"><span class="chip" style="background:#9B7FE0;">3</span>SEVERITY SYSTEM</div>
+    <h2>Not every report is treated the same</h2>
+    <p class="section-sub">A tiered response keeps the network's alerts meaningful instead of noisy.</p>
+  </div>
+  <div class="tier-strip">
+    <div class="tier tier1">
+      <span class="tier-badge">TIER 1</span>
+      <h4>Logged only</h4>
+      <p>Single unverified report, minor issue. Stored against the user ID. A second report later can bump it up automatically.</p>
+    </div>
+    <div class="tier tier2">
+      <span class="tier-badge">TIER 2</span>
+      <h4>Network alert</h4>
+      <p>Confirmed by two reviewers with solid evidence. Broadcast to every partner server's mod-only alert channel.</p>
+    </div>
+    <div class="tier tier3">
+      <span class="tier-badge">TIER 3</span>
+      <h4>Severe / escalated</h4>
+      <p>Credible threats, exploitation, doxxing. Broadcast network-wide and referred directly to Discord Trust & Safety or law enforcement.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FEATURES ===================== -->
+<section id="features" class="wrap">
+  <div class="section-head">
+    <div class="line-tag" style="background:#35C79A15;color:#35C79A;"><span class="chip" style="background:#35C79A;">4</span>ON EVERY LINE</div>
+    <h2>Everything a partner server gets</h2>
+    <p class="section-sub">Not just alerts — a full moderation toolkit that comes with joining.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature">
+      <div class="feature-icon" style="background:#4C8DFF22;color:#4C8DFF;">🚩</div>
+      <h4>Reaction reporting</h4>
+      <p>Any member can flag a message with one reaction. Mods accept, deny, or resolve with a reason — right from the alert.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:#9B7FE022;color:#9B7FE0;">🔤</div>
+      <h4>Custom word filters</h4>
+      <p>Each server bans its own words, censored automatically. Presets for common categories apply in one command.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:#F2A93B22;color:#F2A93B;">🌐</div>
+      <h4>Network-wide banned words</h4>
+      <p>Serious terms are locked at the network level — no single server can quietly remove them.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:#35C79A22;color:#35C79A;">📡</div>
+      <h4>Live health monitor</h4>
+      <p>A self-updating status panel any server can post — uptime, ping, and network stats refreshed automatically.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:#4C8DFF22;color:#4C8DFF;">📢</div>
+      <h4>Partnership ads</h4>
+      <p>Recurring partnership posts targeted by server size, with automatic reposting on a schedule you set.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:#9B7FE022;color:#9B7FE0;">⚖️</div>
+      <h4>Appeals from anywhere</h4>
+      <p>A flagged user can appeal from any partner server or by DM — reviewed like a private mod-mail thread.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== POLICIES ===================== -->
+<section id="policies" class="wrap">
+  <div class="section-head">
+    <div class="line-tag" style="background:#4C8DFF15;color:#4C8DFF;"><span class="chip" style="background:#4C8DFF;">5</span>BEFORE YOU BOARD</div>
+    <h2>Read what you're agreeing to</h2>
+    <p class="section-sub">No fine print buried somewhere else — here's exactly what joining means.</p>
+  </div>
+  <div class="policy-row">
+    <a href="legal-docs.html#privacy" class="policy-card">
+      <span class="pk">DOCUMENT 01</span>
+      <h4>Privacy Policy</h4>
+      <p>What data the bot collects, why, and how it's shared across the network.</p>
+      <span class="go">Read policy →</span>
+    </a>
+    <a href="legal-docs.html#terms" class="policy-card">
+      <span class="pk">DOCUMENT 02</span>
+      <h4>Terms of Service</h4>
+      <p>Acceptable use, the tier system, and what removal from the network looks like.</p>
+      <span class="go">Read terms →</span>
+    </a>
+    <a href="partner-charter.html" class="policy-card">
+      <span class="pk">DOCUMENT 03</span>
+      <h4>Partner Charter</h4>
+      <p>What your server is signing up for, and what your Liaison is responsible for.</p>
+      <span class="go">Read charter →</span>
+    </a>
+  </div>
+</section>
+
+<!-- ===================== FINAL CTA ===================== -->
+<section id="join" class="final-cta">
+  <div class="eyebrow" style="justify-content:center;"><span class="dot"></span>ONBOARDING TAKES ABOUT 5 MINUTES</div>
+  <h2>Bring your server onto the network</h2>
+  <p class="section-sub">Invite the bot, register your alert and mod-log channels, appoint a Liaison — you're connected.</p>
+  <div class="cta-row center">
+    <a href="#" class="btn btn-primary">→ Invite Tunnel Bot</a>
+    <a href="partner-charter.html" class="btn btn-ghost">Read the Charter first</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="brand" style="font-size:.95rem;">
+      <svg class="brand-mark" viewBox="0 0 26 26" fill="none" width="20" height="20">
+        <circle cx="13" cy="13" r="11" stroke="#4C8DFF" stroke-width="2"/>
+        <circle cx="13" cy="13" r="3" fill="#4C8DFF"/>
+      </svg>
+      Tunnel Bot Network
+    </div>
+    <div class="footer-links">
+      <a href="legal-docs.html#privacy">Privacy Policy</a>
+      <a href="legal-docs.html#terms">Terms of Service</a>
+      <a href="partner-charter.html">Partner Charter</a>
+      <a href="#join">Join the network</a>
+    </div>
+    <div class="footer-note">STATUS: OPERATIONAL</div>
+  </div>
+</footer>
+
+</body>
+</html>
