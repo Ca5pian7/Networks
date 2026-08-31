@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tunnel Bot — Setup Docs</title>
+<meta name="description" content="Step-by-step setup guide for partner servers joining the Tunnel Bot network.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0E14; --panel:#12161F; --panel-2:#171C27; --line:#232A38; --line-soft:#1B212D;
+    --text:#E9EDF3; --text-dim:#8A93A3; --text-faint:#59606E;
+    --signal:#4C8DFF; --signal-soft:#4C8DFF22; --teal:#35C79A; --amber:#F2A93B; --violet:#9B7FE0;
+    --display:'Space Grotesk',sans-serif; --body:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(900px 500px at 85% -10%, #1a2233 0%, transparent 60%),
+      radial-gradient(700px 400px at 5% 10%, #16202a 0%, transparent 55%),
+      var(--ink);
+    background-attachment:fixed; color:var(--text); font-family:var(--body); line-height:1.65;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px;}
+  a{color:var(--signal);}
+
+  header.hero{padding:64px 28px 40px;border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--signal);margin-bottom:16px;
+  }
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,4.5vw,2.8rem);line-height:1.1;margin-bottom:16px;max-width:20ch;}
+  .hero-sub{color:var(--text-dim);font-size:1.05rem;max-width:60ch;}
+  .back-link{display:inline-block;margin-top:24px;font-family:var(--mono);font-size:.85rem;color:var(--text-dim);text-decoration:none;}
+  .back-link:hover{color:var(--signal);}
+
+  nav.toc{margin:36px auto 0;max-width:960px;padding:20px 28px;background:var(--panel);border:1px solid var(--line);border-radius:12px;}
+  nav.toc .label{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px;}
+  nav.toc ol{list-style:none;columns:2;column-gap:24px;font-family:var(--mono);font-size:.85rem;}
+  nav.toc li{margin-bottom:8px;break-inside:avoid;}
+  nav.toc a{color:var(--text-dim);text-decoration:none;}
+  nav.toc a:hover{color:var(--signal);}
+
+  section{padding:56px 0;border-bottom:1px solid var(--line-soft);}
+  .step-num{
+    font-family:var(--mono);font-size:.78rem;color:var(--signal);letter-spacing:.08em;
+    display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;
+  }
+  .step-num .n{
+    width:26px;height:26px;border-radius:50%;background:var(--signal-soft);border:1px solid var(--signal);
+    display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--signal);
+  }
+  h2{font-family:var(--display);font-weight:600;font-size:1.6rem;margin-bottom:12px;}
+  h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:24px 0 10px;color:var(--text);}
+  p{color:#d7ddec;margin-bottom:14px;max-width:70ch;}
+  ul,ol{padding-left:22px;margin-bottom:16px;color:#d7ddec;}
+  li{margin-bottom:8px;}
+  strong{color:var(--text);}
+
+  code{font-family:var(--mono);background:#0c1017;border:1px solid var(--line);padding:2px 7px;border-radius:5px;font-size:.86em;color:var(--teal);}
+  pre{
+    background:#0c1017;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;
+    font-family:var(--mono);font-size:.84rem;color:#b9c9e0;line-height:1.6;margin:14px 0;
+  }
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin:18px 0;}
+  .card h4{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--amber);margin-bottom:10px;}
+
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.9rem;}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);}
+  th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--signal);}
+  td{color:#d7ddec;}
+
+  .warn{
+    border-left:3px solid var(--amber);background:#F2A93B12;border-radius:0 8px 8px 0;
+    padding:14px 18px;margin:16px 0;font-size:.92rem;color:#f0d9ae;
+  }
+  .warn strong{color:var(--amber);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;} nav.toc ol{columns:1;}}
+
+  footer{padding:40px 28px 60px;text-align:center;font-family:var(--mono);font-size:.8rem;color:var(--text-faint);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap" style="padding:0;">
+    <div class="eyebrow">Partner Documentation</div>
+    <h1>Setting up Tunnel Bot on your server</h1>
+    <p class="hero-sub">A complete walkthrough for server owners — from inviting the bot to running your first safety report. Takes about 5–10 minutes.</p>
+    <a href="index.html" class="back-link">← Back to network homepage</a>
+  </div>
+</header>
+
+<nav class="toc wrap">
+  <div class="label">On this page</div>
+  <ol>
+    <li><a href="#before">1. Before you start</a></li>
+    <li><a href="#invite">2. Invite the bot</a></li>
+    <li><a href="#channels">3. Create your channels</a></li>
+    <li><a href="#setup-commands">4. Run the setup commands</a></li>
+    <li><a href="#liaison">5. Appoint your Liaison</a></li>
+    <li><a href="#commands">6. Command reference</a></li>
+    <li><a href="#faq">7. FAQ</a></li>
+  </ol>
+</nav>
+
+<div class="wrap">
+
+<section id="before">
+  <div class="step-num"><span class="n">1</span>BEFORE YOU START</div>
+  <h2>What you'll need</h2>
+  <p>Nothing complicated — just server admin access and a few minutes. Here's what's helpful to know going in:</p>
+  <ul>
+    <li>You'll need <strong>Manage Server</strong> permission (or Administrator) to run setup commands.</li>
+    <li>The bot needs to create/manage a couple of channels — make sure you're comfortable granting it <strong>Manage Channels</strong> and <strong>Manage Webhooks</strong> during the invite step.</li>
+    <li>Read the <a href="partner-charter.html">Partner Charter</a> first if you haven't — it explains exactly what joining means, including what data gets shared network-wide.</li>
+  </ul>
+  <div class="warn">
+    <strong>Your server keeps full autonomy.</strong> Joining the network doesn't hand over moderation control — it just connects your alert channel to the network and lets your mods file/receive reports. You decide what to do with any alert you receive.
+  </div>
+</section>
+
+<section id="invite">
+  <div class="step-num"><span class="n">2</span>INVITE THE BOT</div>
+  <h2>Add Tunnel Bot to your server</h2>
+  <p>Click the invite button on the <a href="index.html#join">network homepage</a>, or use the link directly. Choose your server from the dropdown, and approve the requested permissions — these are all needed for the bot's actual features (message management for filters, webhooks for global chat, reactions for the report button).</p>
+</section>
+
+<section id="channels">
+  <div class="step-num"><span class="n">3</span>CREATE YOUR CHANNELS</div>
+  <h2>Set up two or three channels</h2>
+  <p>You only need channels for the features you actually want to use. At minimum, create one mod-only channel for alerts.</p>
+  <table>
+    <tr><th>Channel</th><th>Visibility</th><th>Purpose</th></tr>
+    <tr><td><code>#network-alerts</code></td><td>Mods only</td><td>Required — receives network-wide safety alerts</td></tr>
+    <tr><td><code>#mod-log</code></td><td>Mods only</td><td>Optional — local reaction-reports and word filter hits land here</td></tr>
+    <tr><td><code>#global-chat</code></td><td>Public</td><td>Optional — only if you want cross-server chat</td></tr>
+    <tr><td><code>#partner-ads</code></td><td>Public or staff</td><td>Optional — only if you want to receive partnership ads</td></tr>
+  </table>
+</section>
+
+<section id="setup-commands">
+  <div class="step-num"><span class="n">4</span>RUN THE SETUP COMMANDS</div>
+  <h2>Register your channels</h2>
+  <p>Run each command <strong>inside the channel</strong> you want it tied to — the bot registers whichever channel you're in when you run the command.</p>
+
+  <h3>Required</h3>
+  <pre>/setup alerts_channel</pre>
+  <p>Run this in your mod-only alert channel. This is the only truly required step — everything else is optional.</p>
+
+  <h3>Optional, but recommended</h3>
+  <pre>/setup modlog_channel</pre>
+  <p>Run this in your mod-log channel. Without it, reaction-reports and word filter alerts fall back to your alerts channel.</p>
+
+  <h3>Only if you want global chat</h3>
+  <pre>/setup global_channel</pre>
+  <p>Run this in your public chat channel. The bot needs <strong>Manage Webhooks</strong> here — it creates a webhook automatically to relay messages under each person's real name and avatar.</p>
+
+  <h3>Only if you want partnership ads</h3>
+  <pre>/setup ads_channel</pre>
+</section>
+
+<section id="liaison">
+  <div class="step-num"><span class="n">5</span>APPOINT YOUR LIAISON</div>
+  <h2>One point of contact</h2>
+  <pre>/setup liaison</pre>
+  <p>Run this to register yourself, or mention someone else: <code>/setup liaison user:@SomeMod</code>. Your Liaison is the person responsible for watching alerts and being the network's point of contact for your server.</p>
+</section>
+
+<section id="commands">
+  <div class="step-num"><span class="n">6</span>COMMAND REFERENCE</div>
+  <h2>Everything at a glance</h2>
+  <p>Full interactive command menus are available anytime in Discord — this table is just a quick reference.</p>
+  <table>
+    <tr><th>Command</th><th>What it does</th></tr>
+    <tr><td><code>/help</code></td><td>Browse every server-facing command, works in any partner server</td></tr>
+    <tr><td><code>/report</code></td><td>File a report on a user (mods only)</td></tr>
+    <tr><td><code>/appeal</code></td><td>Appeal a case, works from any partner server or DM</td></tr>
+    <tr><td><code>/wordfilter add / remove / list / preset</code></td><td>Manage your server's custom word filter</td></tr>
+    <tr><td><code>/globalmute</code></td><td>Mute a user from global chat, local to your server</td></tr>
+    <tr><td><code>/monitor enable</code></td><td>Post a live self-updating network health panel</td></tr>
+    <tr><td><code>/networkstatus</code></td><td>One-off snapshot of network stats</td></tr>
+  </table>
+</section>
+
+<section id="faq">
+  <div class="step-num"><span class="n">7</span>FAQ</div>
+  <h2>Common questions</h2>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>Do I have to enable global chat?</h4>
+      <p style="margin:0;">No — every feature beyond the alert channel is opt-in. Skip any <code>/setup</code> command for a feature you don't want.</p>
+    </div>
+    <div class="card">
+      <h4>Can I leave the network later?</h4>
+      <p style="margin:0;">Yes, anytime — just remove the bot from your server. No penalty, no lock-in.</p>
+    </div>
+    <div class="card">
+      <h4>Who sees my reports?</h4>
+      <p style="margin:0;">Only the Review Team, in the private hub. Nothing is public until a case is confirmed and broadcast.</p>
+    </div>
+    <div class="card">
+      <h4>What if a report about my server is wrong?</h4>
+      <p style="margin:0;">Use <code>/appeal</code> — it works from any partner server and starts a private review with the team.</p>
+    </div>
+  </div>
+
+  <p style="margin-top:24px;">Still stuck? Reach out to whoever invited you to the network, or check the <a href="partner-charter.html">Partner Charter</a> and <a href="legal-docs.html">Privacy Policy & Terms</a> for anything not covered here.</p>
+</section>
+
+</div>
+
+<footer>
+  Tunnel Bot Network • Partner Setup Documentation
+</footer>
+
+</body>
+</html>
